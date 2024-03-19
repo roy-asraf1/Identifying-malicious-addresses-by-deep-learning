@@ -10,7 +10,7 @@ import joblib
 import train
 
 # Load the pre-trained model
-loaded_model = joblib.load('your_model_file_path.pkl')
+loaded_model = joblib.load('trained_model_RandomForest.joblib')
 
 def classify_url():
     url = url_entry.get()
