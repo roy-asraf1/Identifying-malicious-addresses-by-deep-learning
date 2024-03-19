@@ -19,10 +19,19 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, mean_squared_error, precision_score, recall_score, f1_score, confusion_matrix
 import seaborn as sns
 from joblib import dump
+import os
 
+current_directory = os.path.dirname(_file_)
 
-file_path ='/home/roy/Documents/daTa.csv'
-model_save_path = '/home/roy/Documents/trained_model_RandomForest.joblib'
+# Define relative paths
+file_name = 'data.csv'
+model_name = 'trained_model_RandomForest.joblib'
+
+# Construct absolute paths
+file_path = os.path.join(current_directory, file_name)
+model_save_path = os.path.join(current_directory, model_name)
+
+# Read CSV file
 df = pd.read_csv(file_path)
 
 # Function to check if a URL uses an IP address
