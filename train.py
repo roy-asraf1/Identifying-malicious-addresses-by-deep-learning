@@ -2,14 +2,10 @@
 import os
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import numpy as np # linear algebra
-import matplotlib.pyplot as plt
 from matplotlib import style 
 from scipy.sparse import hstack
-import seaborn as sns
-from textwrap import wrap
 import matplotlib.pyplot as plt
 import re
-import matplotlib.pyplot as plt
 from colorama import Fore
 from urllib.parse import urlparse
 from sklearn.model_selection import train_test_split
@@ -20,37 +16,20 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import GaussianNB
 import math
-from urllib.parse import urlparse
-import nltk
 from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer  
-from sklearn.model_selection import train_test_split
-from urllib.parse import urlparse
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import metrics
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import precision_score,recall_score,f1_score
 import seaborn as sb
 from collections import Counter
-from textwrap import wrap
-import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, mean_squared_error, precision_score, recall_score, f1_score, confusion_matrix
-from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
-import matplotlib.pyplot as plt
-import nltk
-import pandas as pd
+from joblib import dump
 
-
-file_path = '/home/roy/Documents/last year/cyber/phishing_site_urls.csv'
+file_path ='/home/roy/Documents/daTa.csv'
 df = pd.read_csv(file_path)
-df['Label'] = df['Label'].replace({'good': 1, 'bad': 0}) #for more complex work
-
 
 # Function to check if a URL uses an IP address
 def uses_ip_address(url):
@@ -138,7 +117,7 @@ def check_domain_reputation(domain):
         
 
 def has_suspicious_keywords(url):
-    suspicious_keywords = ['phishing', 'malware', 'scam']  # Add more 
+    suspicious_keywords = ['phishing', 'malware', 'scam','faboleena','g0ogle','faboleena']  # Add more 
     for keyword in suspicious_keywords:
         if keyword in url:
             return True
@@ -150,6 +129,7 @@ def has_subdomains(url):
     else:
         return 0
     
+
 def httpSecure(url):
     htp = urlparse(url).scheme
     match = str(htp)
@@ -187,40 +167,8 @@ def alphabet_entropy(url):
             entropy -= probability * math.log2(probability)
     
     return entropy
-# Function to check if the domain name is an IP address
-def uses_ip_address(url):
-    domain = urlparse(url).hostname
-    if domain:
-        ip_pattern = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
-        return bool(ip_pattern.match(domain))
-    return False
-
-# Function to check if the port number is the default HTTP port (80)
-def uses_default_port(url):
-    parsed_url = urlparse(url)
-    port = parsed_url.port
-    if not port:  # If port is not specified in the URL
-        return True  # Default to port 80
-    return port == 80  # Compare port to default HTTP port
-
-
-
-df['uses_ip'] = df['URL'].apply(uses_ip_address)
-df['count_digits'] = df['URL'].apply(count_digits)
-df['count_letters'] = df['URL'].apply(countletters)
-df['length'] = df['URL'].apply(lengthurl)
-df['letter_digit_letter_count'] = df['URL'].apply(count_letter_digit_letter)
-df['digit_letter_digit_count'] = df['URL'].apply(count_digit_letter_digit)
-df['delimiters_count'], df['longest_word_length'] = zip(*df['URL'].apply(analyze_delimiters_and_longest_word))
-df['has_suspicious_keywords'] = df['URL'].apply(has_suspicious_keywords)
-df['has_subdomains'] = df['URL'].apply(has_subdomains)
-df['numberDots'] = df['URL'].apply(numberDots) 
-df['numberHyphen'] = df['URL'].apply(numberHyphen) 
-df['numberBackSlash'] = df['URL'].apply(numberBackSlash) 
-df['number_rate'] = df['URL'].apply(number_rate)
-df['alphabet_entropy'] = df['URL'].apply(alphabet_entropy)
-df['uses_ip_address'] = df['URL'].apply(uses_ip_address)
-df['uses_default_port'] = df['URL'].apply(uses_default_port)
+def starts_with_https(url):
+    return url.startswith("https://")
 
 def get_accuracy(name, trained_model, x_train, y_train, x_test, y_test):
     tree_predict = trained_model.predict(x_test)
@@ -233,44 +181,67 @@ def get_accuracy(name, trained_model, x_train, y_train, x_test, y_test):
     print("precision : ",precision_score(y_test, tree_predict,average='micro'))
     print("recall    : ",recall_score(y_test, tree_predict,average='micro'))
     print("f1_score  : ",f1_score(y_test, tree_predict,average='micro'))
-
-
     cf1 = confusion_matrix(y_test,tree_predict)
     sb.heatmap(cf1,annot=True,fmt = '.0f')
     plt.xlabel('prediction')
     plt.ylabel('Actual')
     plt.title(name+ ' Confusion Matrix')
     plt.show()
-
     print(classification_report(y_train,  trained_model.predict(x_train)))
     print(classification_report(y_test,  trained_model.predict(x_test)))
 
-print(stopwords.words('english'))
-sw=list(set(stopwords.words("english")))
-df['clean_url']=df.URL.astype(str)
-tok= RegexpTokenizer(r'[A-Za-z0-9]+')
-tok.tokenize(df.URL[1])
-df.clean_url=df.clean_url.map(lambda x: tok.tokenize(x))
-nltk.download('omw-1.4')
-wnl = WordNetLemmatizer()
-df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
-word_vectorizer = TfidfVectorizer(ngram_range=(1,1), max_features =1500)
-unigramdataGet= word_vectorizer.fit_transform(df['lem_url'].astype('str'))
-unigramdataGet = unigramdataGet.toarray()
-vocab = word_vectorizer.get_feature_names_out ()
-x=pd.DataFrame(np.round(unigramdataGet, 1), columns=vocab)
-x[x>0] = 1
-cv = CountVectorizer()
-feature = cv.fit_transform(df.lem_url.astype('str')) 
-x = hstack((feature, df['uses_ip'].values.reshape(-1, 1)))
-y=df.Label
-x_train,x_test,y_train,y_test =  train_test_split(x,y,random_state=42,test_size=0.2,shuffle=True)
-trained_clf_RandomForest = RandomForestClassifier(n_estimators=100, random_state=42)
-trained_clf_RandomForest.fit(x_train, y_train)
-get_accuracy('RandomForest', trained_clf_RandomForest, x_train, y_train, x_test, y_test)
 
 
-def getxtrain():
-    return x_train
-def getytrain():
-    return y_train
+
+def main():
+    df['uses_ip'] = df['url'].apply(uses_ip_address)
+    df['count_digits'] = df['url'].apply(count_digits)
+    df['count_letters'] = df['url'].apply(countletters)
+    df['length'] = df['url'].apply(lengthurl)
+    df['letter_digit_letter_count'] = df['url'].apply(count_letter_digit_letter)
+    df['digit_letter_digit_count'] = df['url'].apply(count_digit_letter_digit)
+    df['has_suspicious_keywords'] = df['url'].apply(has_suspicious_keywords)
+    df['has_subdomains'] = df['url'].apply(has_subdomains)
+    df['numberDots'] = df['url'].apply(numberDots) 
+    df['numberHyphen'] = df['url'].apply(numberHyphen) 
+    df['numberBackSlash'] = df['url'].apply(numberBackSlash) 
+    df['number_rate'] = df['url'].apply(number_rate)
+    df['alphabet_entropy'] = df['url'].apply(alphabet_entropy)
+    df['starts_with_https'] = df['url'].apply(starts_with_https)
+    
+    
+    print(stopwords.words('english'))
+    sw=list(set(stopwords.words("english")))
+    df['clean_url']=df.url.astype(str)
+    #df['clean_url']=df['clean_url'].apply(lambda x:" ".join([word for word in x.split() if word not in sw]))
+    tok= RegexpTokenizer(r'[A-Za-z0-9]+')
+    tok.tokenize(df.url[1])
+    df.clean_url=df.clean_url.map(lambda x: tok.tokenize(x))
+    #nltk.download('omw-1.4')
+    wnl = WordNetLemmatizer()
+    df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
+    word_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=750)
+    tfidf_features = word_vectorizer.fit_transform(df['lem_url'].astype(str))
+    
+    # Initialize CountVectorizer
+    cv = CountVectorizer()
+    count_features = cv.fit_transform(df['lem_url'].astype(str))
+
+    # Split features and target variable
+    y = df['result']
+    X = df.drop(columns=['url', 'label', 'result'])
+    numerical_features = df[['uses_ip', 'count_digits', 'count_letters', 'length', 'letter_digit_letter_count', 
+                             'digit_letter_digit_count', 'has_suspicious_keywords', 'has_subdomains', 'numberDots', 
+                             'numberHyphen', 'numberBackSlash', 'number_rate', 'alphabet_entropy',]]
+
+    # Concatenate features
+    X = hstack([numerical_features.astype(float), tfidf_features, count_features])
+    x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, shuffle=True)
+    
+    # Train Logistic Regression model
+    trained_clf_LogisticRegression = LogisticRegression().fit(x_train, y_train)
+    get_accuracy('LogisticRegression', trained_clf_LogisticRegression, x_train, y_train, x_test, y_test)
+    dump(trained_clf_LogisticRegression, 'trained_model.joblib')
+
+if __name__ == "__main__":
+    main()
