@@ -230,7 +230,7 @@ def main():
 
     # Concatenate features
     X = hstack([numerical_features.astype(float), tfidf_features, count_features])
-    x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.3, shuffle=True)
     
     # Train Logistic Regression model
     trained_clf_RandomForest = RandomForestClassifier().fit(x_train, y_train)
@@ -243,7 +243,7 @@ def main():
     print("Precision: {:.2f}".format(precision_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
     print("Recall: {:.2f}".format(recall_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
     print("F1 Score: {:.2f}".format(f1_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
-    
+    '''
     # Confusion matrix visualization
     cf_matrix = confusion_matrix(y_test, trained_clf_RandomForest.predict(x_test))
     sns.heatmap(cf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Non-Malicious', 'Malicious'], yticklabels=['Non-Malicious', 'Malicious'])
@@ -251,10 +251,9 @@ def main():
     plt.ylabel('Actual')
     plt.title('Random Forest Classifier Confusion Matrix')
     plt.show()
+    '''
     
-    
-    dump(trained_clf_RandomForest, model_save_path)
-    
+    dump(trained_clf_RandomForest, model_save_path) 
     print("its over")
     return 
 if __name__ == "__main__":
