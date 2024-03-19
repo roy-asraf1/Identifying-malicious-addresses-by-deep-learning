@@ -1,8 +1,5 @@
-#configuration
-import os
+
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import numpy as np # linear algebra
-from matplotlib import style 
 from scipy.sparse import hstack
 import matplotlib.pyplot as plt
 import re
@@ -10,11 +7,7 @@ from colorama import Fore
 from urllib.parse import urlparse
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, ExtraTreesClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import SGDClassifier
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 import math
 from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -22,13 +15,14 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from sklearn import metrics
 import seaborn as sb
-from collections import Counter
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, mean_squared_error, precision_score, recall_score, f1_score, confusion_matrix
 import seaborn as sns
 from joblib import dump
 
+
 file_path ='/home/roy/Documents/daTa.csv'
+model_save_path = '/home/roy/Documents/trained_model_RandomForest.joblib'
 df = pd.read_csv(file_path)
 
 # Function to check if a URL uses an IP address
@@ -220,7 +214,7 @@ def main():
     #nltk.download('omw-1.4')
     wnl = WordNetLemmatizer()
     df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
-    word_vectorizer = TfidfVectorizer(ngram_range=(1, 1), max_features=750)
+    word_vectorizer = TfidfVectorizer(ngram_range=(1, 1), max_features=1500)
     tfidf_features = word_vectorizer.fit_transform(df['lem_url'].astype(str))
     
     # Initialize CountVectorizer
@@ -239,9 +233,28 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.2, shuffle=True)
     
     # Train Logistic Regression model
-    trained_clf_LogisticRegression = LogisticRegression().fit(x_train, y_train)
-    get_accuracy('LogisticRegression', trained_clf_LogisticRegression, x_train, y_train, x_test, y_test)
-    dump(trained_clf_LogisticRegression, 'trained_model.joblib')
+    trained_clf_RandomForest = RandomForestClassifier().fit(x_train, y_train)
+
+    #get_accuracy('LogisticRegression', trained_clf_LogisticRegression, x_train, y_train, x_test, y_test)
+        # Evaluate the trained model
+    print("Random Forest Classifier Metrics:")
+    print("Training accuracy: {:.2f}%".format(accuracy_score(y_train, trained_clf_RandomForest.predict(x_train)) * 100))
+    print("Testing accuracy: {:.2f}%".format(accuracy_score(y_test, trained_clf_RandomForest.predict(x_test)) * 100))
+    print("Precision: {:.2f}".format(precision_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
+    print("Recall: {:.2f}".format(recall_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
+    print("F1 Score: {:.2f}".format(f1_score(y_test, trained_clf_RandomForest.predict(x_test), average='weighted')))
+    
+    # Confusion matrix visualization
+    cf_matrix = confusion_matrix(y_test, trained_clf_RandomForest.predict(x_test))
+    sns.heatmap(cf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Non-Malicious', 'Malicious'], yticklabels=['Non-Malicious', 'Malicious'])
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Random Forest Classifier Confusion Matrix')
+    plt.show()
+    
+    
+    dump(trained_clf_RandomForest, model_save_path)
+    
     print("its over")
     return 
 if __name__ == "__main__":
