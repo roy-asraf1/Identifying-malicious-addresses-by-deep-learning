@@ -117,7 +117,7 @@ def check_domain_reputation(domain):
         
 
 def has_suspicious_keywords(url):
-    suspicious_keywords = ['phishing', 'malware', 'scam','faboleena','g0ogle','faboleena']  # Add more 
+    suspicious_keywords = ['phishing', 'malware', 'scam','faboleena','g0ogle']  # Add more 
     for keyword in suspicious_keywords:
         if keyword in url:
             return True
@@ -220,7 +220,7 @@ def main():
     #nltk.download('omw-1.4')
     wnl = WordNetLemmatizer()
     df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
-    word_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=750)
+    word_vectorizer = TfidfVectorizer(ngram_range=(1, 1), max_features=750)
     tfidf_features = word_vectorizer.fit_transform(df['lem_url'].astype(str))
     
     # Initialize CountVectorizer
@@ -232,7 +232,7 @@ def main():
     X = df.drop(columns=['url', 'label', 'result'])
     numerical_features = df[['uses_ip', 'count_digits', 'count_letters', 'length', 'letter_digit_letter_count', 
                              'digit_letter_digit_count', 'has_suspicious_keywords', 'has_subdomains', 'numberDots', 
-                             'numberHyphen', 'numberBackSlash', 'number_rate', 'alphabet_entropy',]]
+                             'numberHyphen', 'numberBackSlash', 'number_rate', 'alphabet_entropy','starts_with_https']]
 
     # Concatenate features
     X = hstack([numerical_features.astype(float), tfidf_features, count_features])
@@ -242,6 +242,7 @@ def main():
     trained_clf_LogisticRegression = LogisticRegression().fit(x_train, y_train)
     get_accuracy('LogisticRegression', trained_clf_LogisticRegression, x_train, y_train, x_test, y_test)
     dump(trained_clf_LogisticRegression, 'trained_model.joblib')
-
+    print("its over")
+    return 
 if __name__ == "__main__":
     main()
