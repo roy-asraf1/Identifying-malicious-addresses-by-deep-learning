@@ -33,7 +33,6 @@ model_save_path = os.path.join(current_directory, model_name)
 
 # Read CSV file
 df = pd.read_csv(file_path)
-
 # Function to check if a URL uses an IP address
 def uses_ip_address(url):
     ip_pattern = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
@@ -194,6 +193,21 @@ def get_accuracy(name, trained_model, x_train, y_train, x_test, y_test):
     print(classification_report(y_test,  trained_model.predict(x_test)))
 
 
+sw=list(set(stopwords.words("english")))
+df['clean_url']=df.url.astype(str)
+#df['clean_url']=df['clean_url'].apply(lambda x:" ".join([word for word in x.split() if word not in sw]))
+tok= RegexpTokenizer(r'[A-Za-z0-9]+')
+tok.tokenize(df.url[1])
+df.clean_url=df.clean_url.map(lambda x: tok.tokenize(x))
+#nltk.download('omw-1.4')
+wnl = WordNetLemmatizer()
+df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
+word_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=1500)
+tfidf_features = word_vectorizer.fit_transform(df['lem_url'].astype(str))
+
+# Initialize CountVectorizer
+cv = CountVectorizer()
+count_features = cv.fit_transform(df['lem_url'].astype(str))
 
 
 def main():
@@ -214,21 +228,6 @@ def main():
     
     
     print(stopwords.words('english'))
-    sw=list(set(stopwords.words("english")))
-    df['clean_url']=df.url.astype(str)
-    #df['clean_url']=df['clean_url'].apply(lambda x:" ".join([word for word in x.split() if word not in sw]))
-    tok= RegexpTokenizer(r'[A-Za-z0-9]+')
-    tok.tokenize(df.url[1])
-    df.clean_url=df.clean_url.map(lambda x: tok.tokenize(x))
-    #nltk.download('omw-1.4')
-    wnl = WordNetLemmatizer()
-    df['lem_url'] = df['clean_url'].map(lambda x: [wnl.lemmatize(word) for word in x])
-    word_vectorizer = TfidfVectorizer(ngram_range=(1, 1), max_features=1500)
-    tfidf_features = word_vectorizer.fit_transform(df['lem_url'].astype(str))
-    
-    # Initialize CountVectorizer
-    cv = CountVectorizer()
-    count_features = cv.fit_transform(df['lem_url'].astype(str))
 
     # Split features and target variable
     y = df['result']
