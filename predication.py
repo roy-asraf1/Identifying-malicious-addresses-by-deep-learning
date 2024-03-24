@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from scipy.sparse import hstack
 import joblib
 import train
+import numpy as np
 
 # Load the pre-trained model
 loaded_model = joblib.load('trained_model_RandomForest.joblib')
@@ -47,7 +48,7 @@ def classify_url():
     count_features = train.cv.transform([str(lem_url)])
 
     # Numerical features
-    numerical_features = train.np.array([[uses_ip, count_digits_val, count_letters_val, length_val, letter_digit_letter_count_val, 
+    numerical_features = np.array([[uses_ip, count_digits_val, count_letters_val, length_val, letter_digit_letter_count_val, 
                                      digit_letter_digit_count_val, has_suspicious_keywords_val, has_subdomains_val, numberDots_val, 
                                      numberHyphen_val, numberBackSlash_val, number_rate_val, alphabet_entropy_val, starts_with_https_val]])
 
