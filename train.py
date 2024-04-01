@@ -1,4 +1,3 @@
-
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 from scipy.sparse import hstack
 import matplotlib.pyplot as plt
@@ -21,7 +20,7 @@ import seaborn as sns
 from joblib import dump
 import os
 
-current_directory = os.path.dirname(_file_)
+current_directory = os.path.dirname(__file__)
 
 # Define relative paths
 file_name = 'data.csv'
@@ -31,8 +30,10 @@ model_name = 'trained_model_RandomForest.joblib'
 file_path = os.path.join(current_directory, file_name)
 model_save_path = os.path.join(current_directory, model_name)
 
-# Read CSV file
 df = pd.read_csv(file_path)
+
+df = pd.read_csv(file_path)
+
 # Function to check if a URL uses an IP address
 def uses_ip_address(url):
     ip_pattern = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')

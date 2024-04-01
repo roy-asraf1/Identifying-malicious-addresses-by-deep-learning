@@ -1,4 +1,3 @@
-
 from joblib import load
 import tkinter as tk
 from tkinter import ttk
@@ -11,14 +10,9 @@ import train
 import numpy as np
 
 # Load the pre-trained model
-loaded_model = joblib.load('trained_model_RandomForest.joblib')
+loaded_model = joblib.load(r'C:\Users\Itamar\Desktop\url_filltering3\trained_model_RandomForest.joblib')
 
-def classify_url():
-    url = url_entry.get()
-    if not url:
-        messagebox.showerror("Error", "Please enter a URL.")
-        return
-    
+def predict_url(url):
     uses_ip = train.uses_ip_address(url)
     count_digits_val = train.count_digits(url)
     count_letters_val = train.countletters(url)
@@ -57,9 +51,39 @@ def classify_url():
 
     # Predict using the loaded model
     prediction = loaded_model.predict(X)
-    
-    # Display result
-    result_label.config(text=f"Classification: {prediction[0]}")
+
+    return prediction[0]
+
+def classify_url():
+    url = url_entry.get()
+    if not url:
+        messagebox.showerror("Error", "Please enter a URL.")
+        return
+
+    # Check if the URL starts with 'http://' or 'https://'
+    if not url.startswith('http://') and not url.startswith('https://'):
+        # Try both 'http://' and 'https://' prefixes
+        http_url = 'http://' + url
+        https_url = 'https://' + url
+
+        # Process and predict for both URLs
+        http_prediction = predict_url(http_url)
+        https_prediction = predict_url(https_url)
+
+        # If both predictions are the same, use that prediction
+        if http_prediction == https_prediction:
+            result_label.config(text=f"Classification: {http_prediction}")
+        else:
+            result_label.config(text=f"Classification: {http_prediction}")
+    else:
+        # Process and predict for the given URL
+        prediction = predict_url(url)
+        
+        # If the URL starts with 'https://' but is still classified as malicious, display a warning
+        if url.startswith('https://') and prediction == '1':
+            result_label.config(text=f"Warning: URL '{url}' is classified as malicious despite starting with 'https://'")
+        else:
+            result_label.config(text=f"Classification: {prediction}")
 
 # GUI setup
 root = tk.Tk()
