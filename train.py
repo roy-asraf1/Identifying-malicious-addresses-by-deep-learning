@@ -32,8 +32,6 @@ model_save_path = os.path.join(current_directory, model_name)
 
 df = pd.read_csv(file_path)
 
-df = pd.read_csv(file_path)
-
 # Function to check if a URL uses an IP address
 def uses_ip_address(url):
     ip_pattern = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
