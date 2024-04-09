@@ -27,7 +27,7 @@ file_name = 'data.csv'
 model_name = 'trained_model_RandomForest.joblib'
 
 # Construct absolute paths
-file_path = os.path.join(current_directory, file_name)
+file_path = '/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/data.csv'
 model_save_path = os.path.join(current_directory, model_name)
 
 df = pd.read_csv(file_path)

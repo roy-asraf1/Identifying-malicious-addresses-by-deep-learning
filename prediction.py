@@ -11,14 +11,16 @@ import train
 import numpy as np
 import os
 
-# Get the full path to the current script file
-script_path = os.path.abspath(__file__)
+# # Get the full path to the current script file
+# script_path = os.path.abspath(__file__)
 
-# Get the directory of the current script file
-script_dir = os.path.dirname(script_path)
+# # Get the directory of the current script file
+# script_dir = os.path.dirname(script_path)
 
+model_path = '/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/trained_model_RandomForest.joblib'
+loaded_model = joblib.load(model_path)
 # Load the pre-trained model
-loaded_model = joblib.load(os.path.join(script_dir, 'trained_model_RandomForest.joblib'))
+# loaded_model = joblib.load(os.path.join(script_dir, 'trained_model_RandomForest.joblib'))
 
 
 def predict_url(url):
@@ -128,7 +130,8 @@ root.title("URL Classifier")
 root.geometry("512x256")  
 
 # Load the background image
-bg_image_open = Image.open(os.path.join(script_dir, 'img.png'))
+bg_image_open = Image.open('/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/img.png')
+# bg_image_open = Image.open(os.path.join(script_dir, 'img.png'))
 # Resize the background image to match the initial size of the window
 bg_image_resized = bg_image_open.resize((root.winfo_width(), root.winfo_height()), Image.LANCZOS)
 bg_image_tk = ImageTk.PhotoImage(bg_image_resized)
