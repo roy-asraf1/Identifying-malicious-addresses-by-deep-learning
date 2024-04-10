@@ -11,16 +11,14 @@ import train
 import numpy as np
 import os
 
-# # Get the full path to the current script file
-# script_path = os.path.abspath(__file__)
+# Get the full path to the current script file
+script_path = os.path.abspath(__file__)
 
-# # Get the directory of the current script file
-# script_dir = os.path.dirname(script_path)
+# Get the directory of the current script file
+script_dir = os.path.dirname(script_path)
 
-model_path = '/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/trained_model_RandomForest.joblib'
-loaded_model = joblib.load(model_path)
 # Load the pre-trained model
-# loaded_model = joblib.load(os.path.join(script_dir, 'trained_model_RandomForest.joblib'))
+loaded_model = joblib.load(os.path.join(script_dir, 'trained_model_RandomForest.joblib'))
 
 
 def predict_url(url):
@@ -65,6 +63,7 @@ def predict_url(url):
 
     return prediction[0]
 
+
 def classify_url():
     url = url_entry.get()
     if not url:
@@ -80,18 +79,38 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
+        print("HTTP URL:", http_url)
+        print("HTTPS URL:", https_url)
+        print("HTTP", http_prediction)
+        print("HTTPS", https_prediction)
         
-        if http_prediction == https_prediction:
-            update_result_and_button(http_prediction)
-        else:
-            update_result_and_button(http_prediction)
+        update_result_and_button(http_prediction)
 
     else:
-        # Process and predict for the given URL
-        prediction = predict_url(url)
+        # Remove 'http://' or 'https://' prefixes if present
+        if url.startswith('http://'):
+            url = url[len('http://'):]
+        elif url.startswith('https://'):
+            url = url[len('https://'):]
+
+        http_url = 'http://' + url
+        https_url = 'https://' + url
+
+        # Process and predict for both URLs
+        http_prediction = predict_url(http_url)
+        https_prediction = predict_url(https_url)
+        print("HTTP URL:", http_url)
+        print("HTTPS URL:", https_url)
+        print("HTTP", http_prediction)
+        print("HTTPS", https_prediction)
         
+        update_result_and_button(http_prediction)
+
+        # # Process and predict for the given URL
+        # prediction = predict_url(url)
+        # update_result_and_button(prediction)
         # Update the result label only
-        result_label.config(text=f"Classification: {prediction}")
+        # result_label.config(text=f"Classification: {prediction}")
 
 
 def update_result_and_button(prediction):
@@ -130,8 +149,7 @@ root.title("URL Classifier")
 root.geometry("512x256")  
 
 # Load the background image
-bg_image_open = Image.open('/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/img.png')
-# bg_image_open = Image.open(os.path.join(script_dir, 'img.png'))
+bg_image_open = Image.open(os.path.join(script_dir, 'img.png'))
 # Resize the background image to match the initial size of the window
 bg_image_resized = bg_image_open.resize((root.winfo_width(), root.winfo_height()), Image.LANCZOS)
 bg_image_tk = ImageTk.PhotoImage(bg_image_resized)
