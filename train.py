@@ -23,11 +23,11 @@ import os
 current_directory = os.path.dirname(__file__)
 
 # Define relative paths
-file_name = 'data.csv'
+file_name = 'daTa.csv'
 model_name = 'trained_model_RandomForest.joblib'
 
 # Construct absolute paths
-file_path = '/home/itamar/Desktop/Malicious_n_Non-Malicious-URL/data.csv'
+file_path = os.path.join(current_directory, file_name)
 model_save_path = os.path.join(current_directory, model_name)
 
 df = pd.read_csv(file_path)

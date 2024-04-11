@@ -1,0 +1,202 @@
+from PIL import Image, ImageTk  # PIL library for handling images
+from joblib import load  # To load the pre-trained model
+import tkinter as tk  # Tkinter for GUI
+from tkinter import ttk  # Themed Tkinter for custom styling
+from tkinter import messagebox  # Messagebox for showing error messages
+from urllib.parse import urlparse  # For parsing URLs
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer  # For text vectorization
+from scipy.sparse import hstack  # For stacking sparse matrices
+import joblib  # For loading pre-trained model
+import train  # Custom module for training data preprocessing
+import numpy as np  # Numpy for numerical operations
+import os  # Operating system dependent functionality
+
+# Get the full path to the current script file
+script_path = os.path.abspath(__file__)
+
+# Get the directory of the current script file
+script_dir = os.path.dirname(script_path)
+
+# Load the pre-trained model
+loaded_model = joblib.load(os.path.join(script_dir, 'trained_model_RandomForest.joblib'))
+
+
+def predict_url(url):
+    """
+    Predict the class (Benign/Malicious) of a given URL.
+    
+    Parameters:
+        url (str): The URL to predict.
+    
+    Returns:
+        int: Predicted class label (0 for Benign, 1 for Malicious).
+    """
+    # Extract features from the URL
+    uses_ip = train.uses_ip_address(url)
+    count_digits_val = train.count_digits(url)
+    count_letters_val = train.countletters(url)
+    length_val = train.lengthurl(url)
+    letter_digit_letter_count_val = train.count_letter_digit_letter(url)
+    digit_letter_digit_count_val = train.count_digit_letter_digit(url)
+    has_suspicious_keywords_val = train.has_suspicious_keywords(url)
+    has_subdomains_val = train.has_subdomains(url)
+    numberDots_val = train.numberDots(url)
+    numberHyphen_val = train.numberHyphen(url)
+    numberBackSlash_val = train.numberBackSlash(url)
+    number_rate_val = train.number_rate(url)
+    alphabet_entropy_val = train.alphabet_entropy(url)
+    starts_with_https_val = train.starts_with_https(url)
+
+    # Tokenize and lemmatize the URL
+    clean_url = url
+    tok = train.RegexpTokenizer(r'[A-Za-z0-9]+')
+    clean_url = tok.tokenize(clean_url)
+    wnl = train.WordNetLemmatizer()
+    lem_url = [wnl.lemmatize(word) for word in clean_url]
+
+    # TF-IDF Vectorization
+    tfidf_features = train.word_vectorizer.transform([str(lem_url)])
+
+    # Count Vectorization
+    count_features = train.cv.transform([str(lem_url)])
+
+    # Numerical features
+    numerical_features = np.array([[uses_ip, count_digits_val, count_letters_val, length_val, letter_digit_letter_count_val,
+                                     digit_letter_digit_count_val, has_suspicious_keywords_val, has_subdomains_val, numberDots_val,
+                                     numberHyphen_val, numberBackSlash_val, number_rate_val, alphabet_entropy_val, starts_with_https_val]])
+
+    # Concatenate features
+    X = hstack([numerical_features.astype(float), tfidf_features, count_features])
+
+    # Predict using the loaded model
+    prediction = loaded_model.predict(X)
+
+    return prediction[0]
+
+
+def classify_url():
+    """
+    Callback function to classify the URL entered by the user.
+    """
+    url = url_entry.get()
+    if not url:
+        messagebox.showerror("Error", "Please enter a URL.")
+        return
+
+    # Check if the URL starts with 'http://' or 'https://'
+    if not url.startswith('http://') and not url.startswith('https://'):
+        # Try both 'http://' and 'https://' prefixes
+        http_url = 'http://' + url
+        https_url = 'https://' + url
+
+        # Process and predict for both URLs
+        http_prediction = predict_url(http_url)
+        https_prediction = predict_url(https_url)
+
+        update_result_and_button(http_prediction)
+
+    else:
+        # Remove 'http://' or 'https://' prefixes if present
+        if url.startswith('http://'):
+            url = url[len('http://'):]
+        elif url.startswith('https://'):
+            url = url[len('https://'):]
+
+        http_url = 'http://' + url
+        https_url = 'https://' + url
+
+        # Process and predict for both URLs
+        http_prediction = predict_url(http_url)
+        https_prediction = predict_url(https_url)
+
+        update_result_and_button(http_prediction)
+
+
+def update_result_and_button(prediction):
+    """
+    Update the result label and button style based on the prediction.
+    
+    Parameters:
+        prediction (int): Predicted class label (0 for Benign, 1 for Malicious).
+    """
+    # Update the result label
+    if prediction == 0:
+        result_label.config(text=f"Classification: Benign", background='light green', foreground='black')
+        classify_button.configure(style='GreenButton.TButton')
+        url_entry.configure(foreground='dark green')
+    else:
+        result_label.config(text=f"Classification: Malicious", background='light coral', foreground='black')
+        classify_button.configure(style='RedButton.TButton')
+        url_entry.configure(foreground='red')
+
+
+def reset_url_entry_color(*args):
+    """
+    Reset the color of the URL entry to black.
+    """
+    url_entry.configure(foreground='black')
+
+
+def resize_bg_image(event):
+    """
+    Resize the background image to match the window size.
+    
+    Parameters:
+        event (Event): The resizing event.
+    """
+    global bg_image_resized
+    global bg_image_tk  # Declare global variable for bg_image_tk
+    global canvas  # Declare global variable for canvas
+    # Resize the background image
+    bg_image_resized = bg_image_open.resize((event.width, event.height), Image.LANCZOS)
+    bg_image_tk = ImageTk.PhotoImage(bg_image_resized)
+    canvas.config(width=event.width, height=event.height)  # Update canvas size
+    canvas.create_image(0, 0, anchor="nw", image=bg_image_tk)
+
+
+# GUI setup
+root = tk.Tk()
+root.title("URL Classifier")
+
+# Set initial size of the window
+root.geometry("512x256")
+
+# Load the background image
+bg_image_open = Image.open(os.path.join(script_dir, 'img.png'))
+# Resize the background image to match the initial size of the window
+bg_image_resized = bg_image_open.resize((root.winfo_width(), root.winfo_height()), Image.LANCZOS)
+bg_image_tk = ImageTk.PhotoImage(bg_image_resized)
+
+# Create a canvas and place the image on it
+canvas = tk.Canvas(root)
+canvas.place(x=0, y=0, relwidth=1, relheight=1)
+
+# Bind the resize function to the window resizing event
+root.bind('<Configure>', resize_bg_image)
+
+# URL Entry
+url_label = ttk.Label(root, text="Enter URL:", foreground="white", background="black")
+url_label.place(x=20, y=20)
+url_entry = ttk.Entry(root, width=50, style='Default.TEntry')
+url_entry.place(x=100, y=20)
+
+# Classify Button
+classify_button = ttk.Button(root, text="Classify", command=classify_url, style ='Default.TButton', width=10)
+classify_button.place(x=200, y=50)
+
+# Result Label
+result_label = ttk.Label(root, text="")
+result_label.place(x=20, y=80)
+
+# Define custom button styles
+root.style = ttk.Style(root)
+root.style.configure('GreenButton.TButton', background='green')
+root.style.configure('RedButton.TButton', background='red')
+
+# Define custom entry styles
+root.style.configure('Green.TEntry', background='light green')
+root.style.configure('Red.TEntry', background='light coral')
+
+url_entry.bind("<KeyRelease>", reset_url_entry_color)
+
+root.mainloop()

@@ -2,23 +2,29 @@
 FROM python:3.10.12
 
 # Metadata indicating an image maintainer
-LABEL maintainer="roy naor itamar"
+LABEL maintainer="Your Name <your.email@example.com>"
 
-# Set the working directory to /app inside the container
-WORKDIR /home/itamar/Desktop/Malicious_n_Non-Malicious-URL/
+# Set the working directory inside the container
+WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy the Python application files into the container
 COPY . .
 
-# Optionally, copy requirements.txt and install Python dependencies
-# Note: Ensure you have a requirements.txt in your Malicious_n_Non-Malicious-URL directory
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy data.csv from the current directory into the container
+COPY daTa.csv /app/
 
-# Make the predication script executable (if necessary)
-RUN chmod +x prediction.py
 
-# No need to expose a port unless your script starts a web server
-# EXPOSE 80
+# Install Python dependencies
+RUN pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir --user flask && \
+    python -m nltk.downloader stopwords && \
+    python -m nltk.downloader wordnet
 
-# Run prediction.py when the container launches
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Define environment variable
+#ENV FLASK_APP=prediction.py
+
+# Run the Python application
 CMD ["python", "prediction.py"]
