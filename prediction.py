@@ -25,8 +25,6 @@ def classify_url():
     url = request.json.get('url')
 
     app.logger.info("Received URL: %s", url)
-    # if url == "www.google.com":
-    #     return jsonify({'classification': 'Benign'})
 
     if not url:
         return jsonify({'error': 'URL not provided'}), 400
