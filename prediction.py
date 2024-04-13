@@ -1,3 +1,5 @@
+import sys
+import logging
 from flask import Flask, request, jsonify
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from scipy.sparse import hstack
@@ -7,6 +9,10 @@ import numpy as np
 import os
 
 app = Flask(__name__)
+
+# Configure Flask logging to use stdout
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.INFO)
 
 # Load the pre-trained model
 script_path = os.path.abspath(__file__)
@@ -18,7 +24,9 @@ def classify_url():
     # Get URL from request
     url = request.json.get('url')
 
-    print("Received URL:", url)
+    app.logger.info("Received URL: %s", url)
+    # if url == "www.google.com":
+    #     return jsonify({'classification': 'Benign'})
 
     if not url:
         return jsonify({'error': 'URL not provided'}), 400
@@ -32,10 +40,12 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
-        print("HTTP Prediction:", http_prediction)
-        print("HTTPS Prediction:", https_prediction)
+        app.logger.info("HTTP Prediction: %s", http_prediction)
+        app.logger.info("HTTPS Prediction: %s", https_prediction)
 
-        return jsonify({'classification': 'Benign' if http_prediction == 0 else 'Malicious'})
+        is_malicious = http_prediction == 1 or https_prediction == 1
+
+        return jsonify({'classification': 'Malicious' if is_malicious else 'Benign'})
     
     else:
         # Remove 'http://' or 'https://' prefixes if present
@@ -50,10 +60,12 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
-        print("HTTP Prediction:", http_prediction)
-        print("HTTPS Prediction:", https_prediction)
+        app.logger.info("HTTP Prediction: %s", http_prediction)
+        app.logger.info("HTTPS Prediction: %s", https_prediction)
 
-        return jsonify({'classification': 'Benign' if http_prediction == 0 else 'Malicious'})
+        is_malicious = http_prediction == 1 or https_prediction == 1
+    
+        return jsonify({'classification': 'Malicious' if is_malicious else 'Benign'})
 
 def predict_url(url):
     """
@@ -104,8 +116,6 @@ def predict_url(url):
 
     # Predict using the loaded model
     prediction = loaded_model.predict(X)
-
-    print("Prediction:", prediction[0])
 
     return prediction[0]
 
