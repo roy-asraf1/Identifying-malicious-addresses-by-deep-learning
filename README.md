@@ -1,8 +1,11 @@
 # Malicious_n_Non-Malicious-URL
 
-how to run the docker:
-- sudo docker build -t 'name of docker' .
-- sudo docker run -p 5000:5000 'name of docker'
+Without docker: Run python prediction-with-gui.py
+
+For docker:
+How to run the docker:
+- docker build -t 'name of docker . '
+- docker run -p 5000:5000 'name of docker'
 
 After the docker prediction.py is on, run gui.py on different terminal
 Afterwards if you want to check the logs you can type:
