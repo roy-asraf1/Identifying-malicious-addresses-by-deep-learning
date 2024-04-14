@@ -1,15 +1,15 @@
-from PIL import Image, ImageTk  # PIL library for handling images
-from joblib import load  # To load the pre-trained model
-import tkinter as tk  # Tkinter for GUI
-from tkinter import ttk  # Themed Tkinter for custom styling
-from tkinter import messagebox  # Messagebox for showing error messages
-from urllib.parse import urlparse  # For parsing URLs
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer  # For text vectorization
-from scipy.sparse import hstack  # For stacking sparse matrices
-import joblib  # For loading pre-trained model
-import train  # Custom module for training data preprocessing
-import numpy as np  # Numpy for numerical operations
-import os  # Operating system dependent functionality
+from PIL import Image, ImageTk 
+from joblib import load  
+import tkinter as tk 
+from tkinter import ttk 
+from tkinter import messagebox 
+from urllib.parse import urlparse 
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer  
+from scipy.sparse import hstack  
+import joblib  
+import train 
+import numpy as np
+import os  
 
 # Get the full path to the current script file
 script_path = os.path.abspath(__file__)
@@ -92,8 +92,10 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
+        
+        is_malicious = http_prediction == 1 or https_prediction == 1
 
-        update_result_and_button(http_prediction)
+        update_result_and_button(is_malicious)
 
     else:
         # Remove 'http://' or 'https://' prefixes if present
@@ -109,7 +111,9 @@ def classify_url():
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
 
-        update_result_and_button(http_prediction)
+        is_malicious = http_prediction == 1 or https_prediction == 1
+
+        update_result_and_button(is_malicious)
 
 
 def update_result_and_button(prediction):

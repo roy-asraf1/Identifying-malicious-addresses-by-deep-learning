@@ -38,15 +38,13 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
-        app.logger.info("HTTP Prediction: %s", http_prediction)
-        app.logger.info("HTTPS Prediction: %s", https_prediction)
 
         is_malicious = http_prediction == 1 or https_prediction == 1
 
         return jsonify({'classification': 'Malicious' if is_malicious else 'Benign'})
     
-    else:
-        # Remove 'http://' or 'https://' prefixes if present
+    else:   # Inserted URL starts with 'http://' or 'https://' 
+        # Remove 'http://' or 'https://' prefixes
         if url.startswith('http://'):
             url = url[len('http://'):]
         elif url.startswith('https://'):
@@ -58,12 +56,11 @@ def classify_url():
         # Process and predict for both URLs
         http_prediction = predict_url(http_url)
         https_prediction = predict_url(https_url)
-        app.logger.info("HTTP Prediction: %s", http_prediction)
-        app.logger.info("HTTPS Prediction: %s", https_prediction)
 
         is_malicious = http_prediction == 1 or https_prediction == 1
     
         return jsonify({'classification': 'Malicious' if is_malicious else 'Benign'})
+
 
 def predict_url(url):
     """
@@ -109,7 +106,7 @@ def predict_url(url):
                                      digit_letter_digit_count_val, has_suspicious_keywords_val, has_subdomains_val, numberDots_val,
                                      numberHyphen_val, numberBackSlash_val, number_rate_val, alphabet_entropy_val, starts_with_https_val]])
 
-    # Concatenate features
+    # Calculating Features
     X = hstack([numerical_features.astype(float), tfidf_features, count_features])
 
     # Predict using the loaded model
@@ -119,4 +116,4 @@ def predict_url(url):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)  # Run the Flask app in debug mode for development
+    app.run(debug=True, host='0.0.0.0', port=5000)  

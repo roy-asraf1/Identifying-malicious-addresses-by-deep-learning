@@ -2,7 +2,7 @@
 FROM python:3.10.12
 
 # Metadata indicating an image maintainer
-LABEL maintainer="Your Name <your.email@example.com>"
+LABEL maintainer="Itamar Naor Roy"
 
 # Set the working directory inside the container
 WORKDIR /app

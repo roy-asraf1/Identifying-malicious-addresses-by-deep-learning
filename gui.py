@@ -28,12 +28,13 @@ def resize_bg_image(event):
         event (Event): The resizing event.
     """
     global bg_image_resized
-    global bg_image_tk  # Declare global variable for bg_image_tk
-    global canvas  # Declare global variable for canvas
+    global bg_image_tk 
+    global canvas  
+
     # Resize the background image
     bg_image_resized = bg_image.resize((event.width, event.height), Image.LANCZOS)
     bg_image_tk = ImageTk.PhotoImage(bg_image_resized)
-    canvas.config(width=event.width, height=event.height)  # Update canvas size
+    canvas.config(width=event.width, height=event.height) 
     canvas.create_image(0, 0, anchor="nw", image=bg_image_tk)
 
 

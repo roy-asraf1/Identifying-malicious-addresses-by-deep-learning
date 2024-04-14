@@ -1,4 +1,4 @@
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import pandas as pd 
 from scipy.sparse import hstack
 import matplotlib.pyplot as plt
 import re
@@ -32,21 +32,27 @@ model_save_path = os.path.join(current_directory, model_name)
 
 df = pd.read_csv(file_path)
 
-# Function to check if a URL uses an IP address
+# Function to check if a URL uses an IP address 
 def uses_ip_address(url):
     ip_pattern = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
     return bool(ip_pattern.match(url))
     
+
+# Total length of URL
 def lengthurl(url):
     return len(url)
 
+
+# Counts number of characters of URL
 def countletters(url):
     count = 0
     for char in url:
         if char.isalpha():
             count += 1
     return count
-    
+
+
+# Counts number of numbers of URL
 def count_digits(url):
     count = 0
     for char in url:
@@ -54,22 +60,26 @@ def count_digits(url):
             count += 1
     return count
 
+
+# Counts num of dots
 def numberDots(url):
     count =0
     for char in url:
         if char=='.':
             count+=1
-
     return count
 
+
+# Check total number of `-`
 def numberHyphen(url):
-    count =0
+    count = 0
     for char in url:
-        if char=='-':
-            count+=1
-
+        if char == '-':
+            count += 1
     return count
 
+
+# num of `\`
 def numberBackSlash(url):
     count =0
     for char in url:
@@ -78,16 +88,20 @@ def numberBackSlash(url):
 
     return count
 
+
+# Checks the number of sequence 
 def count_letter_digit_letter(url):
     pattern = re.compile(r'[a-zA-Z]\d+[a-zA-Z]')
     occurrences = len(re.findall(pattern, url))
     return occurrences
 
 
+# Checks the number of sequence 
 def count_digit_letter_digit(url):
     pattern = re.compile(r'\d+[a-zA-Z]\d+')
     occurrences = len(re.findall(pattern, url))
     return occurrences
+
 
 # Function to count delimiters and find the longest word length
 def analyze_delimiters_and_longest_word(url):
@@ -109,21 +123,15 @@ def analyze_delimiters_and_longest_word(url):
     
     return delimiters_count, longest_word_length
 
-def check_domain_reputation(domain):
-    known_malicious_domains = ['maliciousdomain1.com', 'maliciousdomain2.net']  # need to add more
-    if domain in known_malicious_domains:
-        return True
-    else:
-        return False
-        
 
 def has_suspicious_keywords(url):
-    suspicious_keywords = ['phishing', 'malware', 'scam','faboleena','g0ogle']  # Add more 
+    suspicious_keywords = ['phishing', 'malware', 'scam','faboleena']  
     for keyword in suspicious_keywords:
         if keyword in url:
             return True
     return False
     
+
 def has_subdomains(url):
     if len(url.split('.')) > 2:
         return 1
@@ -134,13 +142,14 @@ def has_subdomains(url):
 def httpSecure(url):
     htp = urlparse(url).scheme
     match = str(htp)
-    if match=='https':
+    if match == 'https':
         # print match.group()
         return 1
     else:
-        # print 'No matching pattern found'
         return 0
 
+
+# Checks the percentage of each feature (Numbers related) presence of the total length
 def number_rate(url):
     # Count occurrences of digits
     digit_count = sum(1 for char in url if char.isdigit())
@@ -150,6 +159,8 @@ def number_rate(url):
     
     return rate
 
+
+# Checks the percentage of each feature (Alphabet related) presence of the total length
 def alphabet_entropy(url):
     # Count occurrences of each letter
     letter_counts = {chr(i): 0 for i in range(ord('a'), ord('z') + 1)}
@@ -168,15 +179,18 @@ def alphabet_entropy(url):
             entropy -= probability * math.log2(probability)
     
     return entropy
+
+
 def starts_with_https(url):
     return url.startswith("https://")
 
+
 def get_accuracy(name, trained_model, x_train, y_train, x_test, y_test):
     tree_predict = trained_model.predict(x_test)
-    print("Testing accuracy   :", metrics.accuracy_score(y_test, tree_predict) * 100, "%")
+    print("Testing accuracy    :", metrics.accuracy_score(y_test, tree_predict) * 100, "%")
     print("MSE [TEST]          :", mean_squared_error(y_test, tree_predict))
     tree_predict1 = trained_model.predict(x_train)
-    print("Training accuracy  :", metrics.accuracy_score(y_train, tree_predict1) * 100, "%")
+    print("Training accuracy   :", metrics.accuracy_score(y_train, tree_predict1) * 100, "%")
     print("MSE [TRAIN]         :",mean_squared_error(y_train, tree_predict1))
 
     print("precision : ",precision_score(y_test, tree_predict,average='micro'))
@@ -192,10 +206,10 @@ def get_accuracy(name, trained_model, x_train, y_train, x_test, y_test):
     print(classification_report(y_test,  trained_model.predict(x_test)))
 
 
-sw=list(set(stopwords.words("english")))
+sw = list(set(stopwords.words("english")))
 df['clean_url']=df.url.astype(str)
 #df['clean_url']=df['clean_url'].apply(lambda x:" ".join([word for word in x.split() if word not in sw]))
-tok= RegexpTokenizer(r'[A-Za-z0-9]+')
+tok = RegexpTokenizer(r'[A-Za-z0-9]+')
 tok.tokenize(df.url[1])
 df.clean_url=df.clean_url.map(lambda x: tok.tokenize(x))
 #nltk.download('omw-1.4')
@@ -263,5 +277,7 @@ def main():
     dump(trained_clf_RandomForest, model_save_path) 
     print("its over")
     return 
+
+
 if __name__ == "__main__":
     main()
